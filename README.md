@@ -349,6 +349,8 @@ If you want to extend it: per-destination rules (split tunnelling) go into `serv
 
 ---
 
+BTW that README.md has been slightly improved by ai and spelling mistakes have also been fixxt with AI
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
