@@ -1,0 +1,13 @@
+[Unit]
+Description=proxyswitch local SOCKS5 router
+After=network-online.target
+
+[Service]
+ExecStart=%h/.local/bin/proxyswitch run --quiet
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

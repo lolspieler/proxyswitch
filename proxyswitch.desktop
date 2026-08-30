@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=proxyswitch
+GenericName=Proxy Switcher
+Comment=Local SOCKS5 router with switchable upstream proxies
+Exec=proxyswitch-gui
+Icon=network-vpn
+Terminal=false
+Categories=Network;Utility;
+Keywords=proxy;socks;vpn;wireguard;
+StartupNotify=true

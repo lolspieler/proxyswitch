@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proxyswitch"
+version = "0.1.0"
+description = "Local SOCKS5 router with switchable upstream proxies"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+proxyswitch = "proxyswitch.cli:main"
+
+[project.gui-scripts]
+proxyswitch-gui = "proxyswitch.gui:main"
+
+[tool.setuptools]
+packages = ["proxyswitch"]
