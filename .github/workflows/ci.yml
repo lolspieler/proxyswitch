@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.9", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Tk on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
+
+      - name: Compile all modules
+        run: python -m compileall -q proxyswitch
+
+      - name: Install the package
+        run: pip install .
+
+      - name: Smoke test the CLI
+        run: |
+          proxyswitch --help
+          proxyswitch add probe --kind direct
+          proxyswitch ls
+
+      - name: Import the GUI module
+        run: python -c "import proxyswitch.gui"

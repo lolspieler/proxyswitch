@@ -16,58 +16,126 @@ There's a GUI and a CLI. Both talk to the same config file, so you can start the
 
 No third-party packages. Everything is standard library. Runs on Windows, Debian/Ubuntu and Arch.
 
+![the proxyswitch window](docs/screenshot.png)
+
 ---
 
 ## Install
 
-You need Python 3.9 or newer and Tk for the GUI. Tk usually ships with Python on Windows and macOS, but on Linux it's often a separate package.
+You need Python 3.9 or newer, and Tk for the GUI. Tk ships with Python on Windows; on Linux it is usually a separate package.
 
-### Debian / Ubuntu
+### Linux
+
+Install the dependencies for your distro:
 
 ```bash
-sudo apt install python3 python3-tk python3-venv pipx
-pipx ensurepath
+sudo pacman -S python tk python-pipx          # Arch
+sudo apt install python3 python3-tk pipx      # Debian / Ubuntu
+sudo dnf install python3 python3-tkinter pipx # Fedora
 ```
 
-### Arch
+Then clone and install:
 
 ```bash
-sudo pacman -S python tk python-pipx
+git clone https://github.com/lolspieler/proxyswitch.git
+cd proxyswitch
 pipx ensurepath
+./install.sh
+```
+
+`install.sh` checks that Tk is present, installs the package with pipx, and drops the desktop entry and icon into `~/.local/share/`, so the app shows up in your launcher (rofi, wofi, fuzzel, Noctalia, GNOME, whatever reads XDG entries). Open a new terminal afterwards so `~/.local/bin` is on your PATH, then:
+
+```bash
+proxyswitch-gui
+```
+
+If you'd rather do it by hand, or the script fails:
+
+```bash
+pipx install .
+cp proxyswitch.desktop ~/.local/share/applications/
+mkdir -p ~/.local/share/icons/hicolor/scalable/apps
+cp proxyswitch.svg ~/.local/share/icons/hicolor/scalable/apps/
+update-desktop-database ~/.local/share/applications
+```
+
+Test that the launcher entry works without opening your launcher:
+
+```bash
+gtk-launch proxyswitch
 ```
 
 ### Windows
 
-Install Python from python.org (the installer includes Tk) and tick "Add python.exe to PATH". Then, in PowerShell:
+Install Python from [python.org](https://www.python.org/downloads/) — the installer includes Tk. Tick **Add python.exe to PATH** on the first screen, that part matters.
+
+Then, in PowerShell:
 
 ```powershell
 py -m pip install --user pipx
 py -m pipx ensurepath
 ```
 
-### Then, on any of them
+Close and reopen PowerShell so the PATH change takes effect, then:
 
-```bash
+```powershell
+git clone https://github.com/lolspieler/proxyswitch.git
 cd proxyswitch
 pipx install .
 ```
 
-That gives you two commands: `proxyswitch` for the terminal and `proxyswitch-gui` for the app. On Windows the GUI one starts without a console window hanging around.
+Start it with `proxyswitch-gui`. That entry point is registered as a GUI script, so it opens without leaving a console window behind.
 
-If you don't want to install anything, running it straight out of the folder works too:
+To get a Start menu or desktop shortcut, right-click `proxyswitch-gui.exe` in `%USERPROFILE%\.local\bin` and send it to your desktop. For autostart, press Win+R, type `shell:startup`, and drop the shortcut in that folder.
+
+No git? Download the repo as a ZIP from the green **Code** button, extract it, and run the same `pipx install .` inside the extracted folder.
+
+### As an AppImage
+
+If you'd rather have one portable file than an install, build one:
 
 ```bash
-python3 -m proxyswitch gui
+cd ~/dev/proxyswitch
+bash build-appimage.sh
 ```
 
-On Windows you can also just double-click `launch-gui.pyw`.
+It bundles the Python interpreter, the standard library and Tcl/Tk from your machine, so the result runs on systems that don't have Python or Tk installed at all. You need `python3`, `tk` and `curl` on the machine you build on. The script fetches `appimagetool` from GitHub if it isn't already installed.
 
-Your profiles live in:
+Out comes `proxyswitch-x86_64.AppImage`, around 18 MB:
+
+```bash
+chmod +x proxyswitch-x86_64.AppImage
+./proxyswitch-x86_64.AppImage
+```
+
+The CLI is in there too:
+
+```bash
+./proxyswitch-x86_64.AppImage --cli ls
+./proxyswitch-x86_64.AppImage --cli use work
+```
+
+Move it wherever you like — `~/Applications` is the usual spot. To get it into your launcher, install [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher), or write the desktop entry yourself and point `Exec=` at the file's full path.
+
+Two caveats. If the AppImage refuses to start with a FUSE error, either install `fuse2`, or run it with `APPIMAGE_EXTRACT_AND_RUN=1 ./proxyswitch-x86_64.AppImage`. And an AppImage built on Arch will generally run on older distros only if their glibc is new enough — build on the oldest system you care about if you plan to hand it around.
+
+### Without installing anything
+
+Both platforms can run it straight out of the folder:
+
+```bash
+python3 -m proxyswitch gui      # Linux
+py -m proxyswitch gui           # Windows
+```
+
+On Windows, double-clicking `launch-gui.pyw` does the same thing.
+
+### Where your settings live
 
 - Linux: `~/.config/proxyswitch/config.json`
 - Windows: `%APPDATA%\proxyswitch\config.json`
 
-The file is chmod 600 on Linux because proxy passwords are in there in plain text. Don't commit it.
+On Linux the file is chmod 600, because proxy passwords sit in it in plain text. It's in `.gitignore` — keep it that way.
 
 ---
 
@@ -270,6 +338,17 @@ proxyswitch/
   vpn.py        wireguard wrapper
   gui.py        the Tk app
   cli.py        argument parsing and terminal output
+docs/
+  screenshot.png
+install.sh      one-shot installer for Linux
+build-appimage.sh  packs everything into a portable AppImage
+launch-gui.pyw  double-click launcher for Windows
 ```
 
 If you want to extend it: per-destination rules (split tunnelling) go into `server.handle`, right before `config.resolve` picks the profile. Rotating proxies go in the same spot.
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE).

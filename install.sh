@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 cd "$(dirname "$0")"
@@ -25,6 +26,21 @@ else
     exit 1
 fi
 
+echo "==> adding it to your application menu"
+mkdir -p ~/.local/share/applications
+mkdir -p ~/.local/share/icons/hicolor/scalable/apps
+cp proxyswitch.svg ~/.local/share/icons/hicolor/scalable/apps/proxyswitch.svg
+cp proxyswitch.desktop ~/.local/share/applications/proxyswitch.desktop
+
+if ! command -v proxyswitch-gui >/dev/null 2>&1; then
+    HERE="$(pwd)"
+    sed -i "s|^Exec=.*|Exec=python3 -m proxyswitch gui|" ~/.local/share/applications/proxyswitch.desktop
+    sed -i "/^Exec=/a Path=$HERE" ~/.local/share/applications/proxyswitch.desktop
+fi
+
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database ~/.local/share/applications
+command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f -t ~/.local/share/icons/hicolor 2>/dev/null
+
 echo
-echo "==> optional: add it to your application menu"
-echo "  cp proxyswitch.desktop ~/.local/share/applications/"
+echo "it should now show up in your launcher. test it without one:"
+echo "  gtk-launch proxyswitch"

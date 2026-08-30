@@ -3,7 +3,9 @@ __pycache__/
 *$py.class
 
 build/
+build-appimage/
 dist/
+*.AppImage
 *.egg-info/
 .eggs/
 
